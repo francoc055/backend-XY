@@ -33,16 +33,22 @@ class ComentController extends Controller
     public function store(Request $request)
     {
         try {
-            $comment = $request->input();
-            Coment::create($comment);
+            $user = JWTAuth::parseToken()->authenticate();
+            $commentData = $request->input(); 
+
+            $comment = new Coment();
+            $comment->fill($commentData); 
+            $comment->user_id = $user->id; 
+
+            $comment->save(); 
+
             return response()->json(['message' => 'Comentario agregado correctamente'], 201);
-    
+
         } catch (Exception $e) {
-            // Manejar cualquier excepción que pueda ocurrir
             return response()->json(['error' => $e], 500);
         }
-
     }
+
 
     /**
      * Display the specified resource.
@@ -61,7 +67,7 @@ class ComentController extends Controller
             $comments = Coment::where('task_id', $task->id)->get();
     
             return response()->json(['comments' => $comments], 200);
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // Manejar cualquier excepción que pueda ocurrir
             return response()->json(['error' => 'No se encontraron comentarios para la tarea especificada'], 404);
         }

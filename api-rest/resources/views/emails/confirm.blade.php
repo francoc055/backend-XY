@@ -7,6 +7,6 @@
 <body>
     <h1>Confirmar cuenta</h1>
     <h2>{{$contenido}}</h2>
-    <p>{{$url}}</p>
+    <a href={{$url}} target="_blank">enlace</a>
 </body>
 </html>

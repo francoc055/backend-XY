@@ -18,7 +18,12 @@ class UserController extends Controller
      */
     public function index()
     {
-        //
+        try{
+            $users = User::where('role', 'employee')->get();
+            return response()->json($users, 200);
+        }catch(Exception $e){
+            return response()->json(['Error' => 'no es encontraron usuarios'], 404);
+        }
     }
 
     /**
@@ -40,9 +45,9 @@ class UserController extends Controller
 
             $createdUser = User::create($user);
     
-            Mail::to($createdUser->email)->send(new ConfirmAccount('establece pass', 'url'));
+            Mail::to($createdUser->email)->send(new ConfirmAccount('establece pass', 'http://localhost:5173/resetPass'));
     
-            return response()->json(['message' => 'Correo electrónico de confirmación enviado correctamente.']);
+            return response()->json(['message' => 'Correo electrónico de confirmación enviado correctamente.'], 201);
         } catch (Exception $e) {
             return response()->json(['error' => 'No se pudo crear el usuario.']);
         }
@@ -79,11 +84,16 @@ class UserController extends Controller
         $user->password = Hash::make($data['password']);
         $user->save();
 
-        return response()->json(['message' => 'Contraseña restablecida correctamente']);
+        return response()->json(['message' => 'Contraseña restablecida correctamente'], 204);
     }
 
     public function SendEmail(Request $request){
-        Mail::to($request->input('email'))->send(new ConfirmAccount('restablecer pass', 'url'));
+        $user = User::where('email', $request->input('email'))->first();
+
+        if (!$user) {
+            return response()->json(['error' => 'Correo electrónico no encontrado'], 404);
+        }
+        Mail::to($user->email)->send(new ConfirmAccount('restablecer pass', 'http://localhost:5173/resetPass'));
 
         return response()->json(['message' => 'Correo electrónico enviado'], 200);
 
